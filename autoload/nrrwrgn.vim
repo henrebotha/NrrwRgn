@@ -816,6 +816,11 @@ fun! <sid>SetupBufLocalCommands() abort "{{{1
 	com! -buffer NRNoSyncOnWrite :call nrrwrgn#ToggleSyncWrite(0)
 endfun
 
+fun! <sid>WidenAndClose() abort "{{{1
+    :call nrrwrgn#WidenRegion(1)
+    :bd
+endfun
+
 fun! <sid>SetupBufLocalMaps(bang) abort "{{{1
 	if !hasmapto('<Plug>NrrwrgnWinIncr', 'n')
 		nmap <buffer> <Leader><Space> <Plug>NrrwrgnWinIncr
@@ -824,10 +829,12 @@ fun! <sid>SetupBufLocalMaps(bang) abort "{{{1
 		nnoremap <buffer><unique><script><silent><expr> <Plug>NrrwrgnWinIncr <sid>ToggleWindowSize()
 	endif
 	if a:bang && winnr('$') == 1
-		" Map away :q and :q! in single window mode, so that :q won't
-		" accidently quit vim.
+		" Map away :q, :q!, :wq, and :wq! in single window mode, so that
+		" those commands won't accidently quit vim.
 		cabbr <buffer> q  <c-r>=(getcmdtype()==':'&&getcmdpos()==1 ? ':bd' : ':q')<cr>
+		cabbr <buffer> wq <c-r>=(getcmdtype()==':'&&getcmdpos()==1 ? ':call <sid>WidenAndClose()' : ':wq')<cr>
 		cabbr <buffer> q! <c-r>=(getcmdtype()==':'&&getcmdpos()==1 ? ':bd!' : ':q!')<cr>
+		cabbr <buffer> wq! <c-r>=(getcmdtype()==':'&&getcmdpos()==1 ? ':call <sid>WidenAndClose()' : ':wq!')<cr>
 	endif
 endfun
 
